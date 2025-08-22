@@ -1,0 +1,46 @@
+name: tomato
+description: "zomato-clone"
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.8
+  fluttertoast: ^8.2.4
+  provider: ^6.1.2
+  flutter_spinkit: ^5.2.0
+
+  # Networking
+  http: ^0.13.6
+
+  # Storage
+  shared_preferences: ^2.2.2
+
+  # JSON Serialization
+  json_annotation: ^4.9.0
+
+  # Location Handling
+  geolocator: ^9.0.2
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.9
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/tomato_splash.png
+    - assets/tomato_logo.png
