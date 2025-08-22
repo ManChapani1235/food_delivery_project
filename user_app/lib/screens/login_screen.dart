@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 
+import '../services/api_config.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
@@ -19,10 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
 
-  final String baseUrl = 'http://localhost:4000/api/user/login';
-  final String updateLocationUrl =
-      'http://localhost:4000/api/user/update-location';
-
   Future<void> handleLogin() async {
     setState(() => isLoading = true);
 
@@ -33,10 +30,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse(baseUrl),
+        Uri.parse(ApiConfig.endpoint('/api/user/login')),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
+
+      if (response.statusCode != 200) {
+        _showError("Login failed: ${response.statusCode}");
+        setState(() => isLoading = false);
+        return;
+      }
 
       final data = jsonDecode(response.body);
 
@@ -46,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('userId', data['id'] ?? '');
         await prefs.setString('userName', data['name'] ?? '');
 
-        // 🔹 Ask location permission & send to backend
         await _requestAndSendLocation(data['token'] ?? '');
 
         if (!mounted) return;
@@ -68,11 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
 
-    // Check permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -80,20 +80,17 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     if (permission == LocationPermission.deniedForever) return;
 
-    // Get current position
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
-    // Save locally
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble("latitude", position.latitude);
     await prefs.setDouble("longitude", position.longitude);
 
-    // Send to backend
     try {
       await http.put(
-        Uri.parse(updateLocationUrl),
+        Uri.parse(ApiConfig.endpoint('/api/user/update-location')),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -164,25 +161,25 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 30),
               isLoading
                   ? const Center(
-                  child: CircularProgressIndicator(color: Colors.white))
+                      child: CircularProgressIndicator(color: Colors.white))
                   : SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFFe23744),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFFe23744),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
               const SizedBox(height: 20),
               Center(
                 child: TextButton(

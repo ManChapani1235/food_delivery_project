@@ -111,19 +111,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (imagePath.startsWith("data:image")) {
-      final base64Str = imagePath.split(',').last;
-      final bytes = base64Decode(base64Str);
-      return Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: 150,
-        errorBuilder: (_, __, ___) => Container(
+      try {
+        final base64Str = imagePath.split(',').last;
+        final bytes = base64Decode(base64Str);
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: 150,
+          errorBuilder: (_, __, ___) => Container(
+            height: 150,
+            color: Colors.grey[200],
+            child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+          ),
+        );
+      } catch (_) {
+        return Container(
           height: 150,
           color: Colors.grey[200],
           child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
-        ),
-      );
+        );
+      }
     }
 
     return Image.network(
@@ -357,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight:
-                      isSelected ? FontWeight.bold : FontWeight.normal,
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -427,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           ClipRRect(
             borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(12)),
+                const BorderRadius.vertical(top: Radius.circular(12)),
             child: _buildImage(r.image),
           ),
           Padding(

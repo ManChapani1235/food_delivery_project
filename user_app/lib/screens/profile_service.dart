@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../services/api_config.dart';
 
 class ProfileService {
-  static const String baseUrl = "http://localhost:4000/api/user";
+  static String get _baseUrl => ApiConfig.endpoint('/api/user');
 
   static Future<bool> updateField({
     required String token,
@@ -11,7 +12,7 @@ class ProfileService {
   }) async {
     try {
       final res = await http.put(
-        Uri.parse("$baseUrl/update-profile/$userId"),
+        Uri.parse("$_baseUrl/update-profile/$userId"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -37,7 +38,7 @@ class ProfileService {
   }) async {
     try {
       final res = await http.post(
-        Uri.parse("$baseUrl/change-password/$userId"),
+        Uri.parse("$_baseUrl/change-password/$userId"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
